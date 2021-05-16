@@ -1,0 +1,128 @@
+# Default values for webmentiond.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Replicas are not currently supported
+#replicaCount: 1
+
+image:
+  repository: zerok/webmentiond
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# The server configuration
+config:
+  mail:
+    # The name of the secret containing `user` and `password` for the
+    # mail server (set to "" to disable authentication)
+    secretRef: webmentiond
+
+    # The mail server host
+    host: ""
+
+    # The port to connect to the mail server on
+    port: "587"
+
+    # Whether to disable TLS when connecting to the mail server
+    disableTls: false
+
+    # The address to put in the `From:` line of emails sent by the
+    # server
+    from: ""
+
+  # The parts of the URL for the server (required by the admin
+  # interface)
+  public:
+    # The hostname, e.g. webmentions.example.com
+    host: ""
+
+    # The path without a leading slash, e.g. `admin`
+    path: ""
+
+  auth:
+    # The name of the secret containing the `secret` key, whose value
+    # will be used to encrypt the JWT in the admin interface
+    secretRef: "webmentiond-jwt"
+
+    # The space-separated list of email addresses that can be used to
+    # log in
+    adminEmails: ""
+
+    # Note: There is no way to pass the JWT TTL as the command-line
+    # argument makes it fail to start
+
+  # Whether to send email notifications
+  sendNotifications: false
+
+  # The space-separated list of domains for which the server accepts
+  # Webmentions
+  allowedTargetDomains: ""
+
+persistence:
+  # Whether to enable persistence (will use a temporary volume if not)
+  enabled: true
+
+  # The name of an existing claim to use (required if persistence is
+  # enabled)
+  existingClaim: ""
+
+# Annotations to add to all pods created
+podAnnotations: {}
+
+# Security context to apply to all pods created
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# Security context to apply to all containers created
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  # Whether to create a Service
+  enabled: true
+
+  # The type of Service to create
+  type: ClusterIP
+
+  # The port on which the Service should listen
+  port: 80
+
+ingress:
+  # Whether to create a Traefik IngressRoute using the hostname and
+  # path set in config.public
+  enabled: false
+
+  # Annotations to add to all ingress resources created
+  annotations: {}
+
+  tls:
+    # The name of the secret containing the TLS details
+    secretRef: ""
+
+  # Any custom middleware to add
+  middleware: []
+    # - name: my-custom-middleware
+    # - name: my-custom-middleware-2
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

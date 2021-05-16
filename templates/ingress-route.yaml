@@ -1,0 +1,62 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "webmentiond.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ $fullName }}-https-only
+  labels:
+    {{- include "webmentiond.labels" . | nindent 4}}
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "webmentiond.fullname" . }}
+  labels:
+    {{- include "webmentiond.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: "Host(`{{ .Values.config.public.host }}`) && PathPrefix(`{{ include "webmentiond.publicPath" . }}`)"
+      kind: Rule
+      {{- with .Values.ingress.middleware }}
+      middlewares:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      services:
+        - name: {{ $fullName }}
+          port: {{ .Values.service.port }}
+  tls:
+    secretName: "{{ .Values.ingress.tls.secretRef }}"
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ $fullName }}-http
+  labels:
+    {{- include "webmentiond.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: "Host(`{{ .Values.config.public.host }}`) && PathPrefix(`{{ include "webmentiond.publicPath" . }}`)"
+      middlewares:
+        - name: {{ $fullName }}-https-only
+      kind: Rule
+      services:
+        - name: {{ $fullName }}
+          port: {{ .Values.service.port }}
+{{- end }}

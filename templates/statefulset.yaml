@@ -1,0 +1,119 @@
+{{- $fullName := include "webmentiond.fullname" . -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "webmentiond.fullname" . }}
+  labels:
+    {{- include "webmentiond.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "webmentiond.selectorLabels" . | nindent 6 }}
+  replicas: 1
+  serviceName: {{ $fullName }}
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "webmentiond.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "--addr"
+            - "0.0.0.0:8080"
+            - "--public-url"
+            - "{{ include "webmentiond.publicUrl" . }}"
+            {{- with .Values.sendNotifications }}
+            - "--send-notifications"
+            {{- end }}
+            {{- with .Values.config.auth }}
+            - "--auth-jwt-secret"
+            - "$AUTH_JWT_SECRET"
+            - "--auth-admin-emails"
+            - "{{ required "config.auth.adminEmails is required!" .adminEmails }}"
+            {{- end }}
+            - "--allowed-target-domains"
+            - "{{ required "config.allowedTargetDomains is required!" .Values.config.allowedTargetDomains }}"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: AUTH_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.auth.secretRef }}
+                  key: secret
+            {{- with .Values.config.mail.secretRef }}
+            - name: MAIL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ . }}"
+                  key: user
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ . }}"
+                  key: password
+            {{- end }}
+            - name: MAIL_HOST
+              value: "{{ required "config.mail.host is required!" .Values.config.mail.host }}"
+            - name: MAIL_PORT
+              value: "{{ .Values.config.mail.port }}"
+            - name: MAIL_FROM
+              value: "{{ required "config.mail.from is required!" .Values.config.mail.from }}"
+            {{- if .Values.config.mail.disableTls }}
+            - name: MAIL_NO_TLS
+              value: "true"
+            {{- end }}
+          volumeMounts:
+            - mountPath: /data
+              name: {{ $fullName }}
+          livenessProbe:
+            httpGet:
+              path: {{ include "webmentiond.publicPath" . }}
+              port: http
+          readinessProbe:
+            httpGet:
+              path: {{ include "webmentiond.publicPath" . }}
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: {{ $fullName }}
+          persistentVolumeClaim:
+            claimName: {{ required "persistence.existingClaim is required for persistence!" .Values.persistence.existingClaim }}
+      {{- else }}
+      volumes:
+        - name: {{ $fullName }}
+          emptyDir: {}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
