@@ -73,19 +73,6 @@ persistence:
 # Annotations to add to all pods created
 podAnnotations: {}
 
-# Security context to apply to all pods created
-podSecurityContext: {}
-  # fsGroup: 2000
-
-# Security context to apply to all containers created
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
 service:
   # Whether to create a Service
   enabled: true
@@ -95,6 +82,21 @@ service:
 
   # The port on which the Service should listen
   port: 80
+
+# Security context to apply to all pods created (you shouldn’t need to
+# change this unless you have unusual requirements)
+podSecurityContext:
+  fsGroup: 1500
+  fsGroupChangePolicy: "OnRootMismatch"
+
+# Security context to apply to all containers created (you shouldn’t
+# need to change this unless you have unusual requirements)
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsUser: 1500
 
 ingress:
   # Whether to create a Traefik IngressRoute using the hostname and
