@@ -31,3 +31,9 @@ volume’s [access
 mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes)
 is `ReadWriteMany` so that it can be simultaneously mounted by all the
 replicas. (This is not supported by some providers.)
+
+## Security
+
+By default, the pods drop all privileges and run as UID 1500. If your
+requirements differ, you can override `podSecurityContext` and
+`securityContext` as usual.
