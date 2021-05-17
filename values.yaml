@@ -21,26 +21,26 @@ config:
     # mail server (set to "" to disable authentication)
     secretRef: webmentiond
 
-    # The mail server host
+    # The mail server host (required)
     host: ""
 
-    # The port to connect to the mail server on
+    # The port to connect to the mail server on (required)
     port: "587"
 
     # Whether to disable TLS when connecting to the mail server
     disableTls: false
 
     # The address to put in the `From:` line of emails sent by the
-    # server
+    # server (required)
     from: ""
 
   # The parts of the URL for the server (required by the admin
   # interface)
   public:
-    # The hostname, e.g. webmentions.example.com
+    # The hostname, e.g. webmentions.example.com (required)
     host: ""
 
-    # The path without a leading slash, e.g. `admin`
+    # The path without a leading slash, e.g. `admin` (required)
     path: ""
 
   auth:
@@ -49,7 +49,7 @@ config:
     secretRef: "webmentiond-jwt"
 
     # The space-separated list of email addresses that can be used to
-    # log in
+    # log in (required)
     adminEmails: ""
 
     # Note: There is no way to pass the JWT TTL as the command-line
@@ -59,7 +59,7 @@ config:
   sendNotifications: false
 
   # The space-separated list of domains for which the server accepts
-  # Webmentions
+  # Webmentions (required)
   allowedTargetDomains: ""
 
 persistence:
