@@ -14,7 +14,7 @@ $ helm install --atomic my-release .
 
 ## Parameters
 
-See the comments in <values.yaml>.
+See the comments in [values.yaml](values.yaml).
 
 ## Persistence
 
