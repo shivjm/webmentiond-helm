@@ -101,6 +101,9 @@ spec:
           persistentVolumeClaim:
             claimName: {{ required "persistence.existingClaim is required for persistence!" .Values.persistence.existingClaim }}
       {{- else }}
+      {{- if gt .Values.replicaCount 1 }}
+      {{- fail "Multiple replicas cannot be used with persistence disabled!" }}
+      {{- end }}
       volumes:
         - name: {{ $fullName }}
           emptyDir: {}
