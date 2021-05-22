@@ -61,6 +61,9 @@ config:
   # Webmentions (required)
   allowedTargetDomains: ""
 
+  # Whether to add annotations to scrape Prometheus metrics
+  prometheus: true
+
 persistence:
   # Whether to enable persistence (will use a temporary volume if not)
   enabled: true

@@ -15,8 +15,13 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+      {{- if .Values.config.prometheus }}
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: http
+      {{- end }}
+      {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
