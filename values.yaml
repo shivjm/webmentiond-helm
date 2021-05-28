@@ -2,6 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# -- how many instances of webmentiond to run (see note about persistence in README)
 replicaCount: 1
 
 image:
@@ -16,106 +17,104 @@ fullnameOverride: ""
 # The server configuration
 config:
   mail:
-    # The name of the secret containing `user` and `password` for the
-    # mail server (set to "" to disable authentication)
+    # -- name of secret containing `user` & `password` for mail server
+    # (set to "" to disable authentication)
     secretRef: webmentiond
 
-    # The mail server host (required)
-    host: ""
+    # -- (string )mail server host (required)
+    host:
 
-    # The port to connect to the mail server on (required)
+    # -- port to connect to mail server on (required)
     port: "587"
 
-    # Whether to disable TLS when connecting to the mail server
+    # -- whether to disable TLS when connecting to the mail server
     disableTls: false
 
-    # The address to put in the `From:` line of emails sent by the
-    # server (required)
-    from: ""
+    # -- (string) address to put in `From:` line of emails sent by server
+    # (required)
+    from:
 
-  # The parts of the URL for the server (required by the admin
-  # interface)
   public:
-    # The hostname, e.g. webmentions.example.com (required)
-    host: ""
+    # -- (string) publicly accessible hostname, e.g.
+    # webmentions.example.com (required)
+    host:
 
-    # The path without a leading slash, e.g. `admin` (required)
-    path: ""
+    # -- (string) publicly accessible path without leading slash, e.g.
+    # `admin`
+    path:
 
   auth:
-    # The name of the secret containing the `secret` key, whose value
-    # will be used to encrypt the JWT in the admin interface
+    # -- name of secret containing `secret` key (used to encrypt JWT
+    # in admin interface)
     secretRef: "webmentiond-jwt"
 
-    # The space-separated list of email addresses that can be used to
-    # log in (required)
-    adminEmails: ""
+    # -- (string) space-separated list of email addresses that can be
+    # used to log in (required)
+    adminEmails:
 
     # Note: There is no way to pass the JWT TTL as the command-line
     # argument makes it fail to start
 
-  # Whether to send email notifications
+  # -- whether to send email notifications
   sendNotifications: false
 
-  # The space-separated list of domains for which the server accepts
-  # Webmentions (required)
-  allowedTargetDomains: ""
+  # -- (string) space-separated list of domains for which server
+  # accepts Webmentions (required)
+  allowedTargetDomains:
 
 prometheus:
-  # Whether to add annotations to scrape Prometheus metrics
+  # -- whether to add annotations to scrape Prometheus metrics
   annotations: false
 
   serviceMonitor:
-    # Whether to create a ServiceMonitor from the Prometheus Operator
+    # -- whether to create ServiceMonitor from Prometheus Operator
     enabled: false
 
-    # The namespace to create a ServiceMonitor in
+    # -- namespace to create ServiceMonitor in
     namespace: ""
 
-    # Labels to apply to the ServiceMonitor
+    # -- labels to apply to ServiceMonitor
     labels: {}
 
-    # Annotations to apply to the ServiceMonitor
+    # -- annotations to apply to ServiceMonitor
     annotations: {}
 
-    # How frequently Prometheus should scrape the service
-    interval: ""
+    # -- (string) how frequently Prometheus should scrape service
+    interval:
 
-    # Time after which the scrape is ended
-    scrapeTimeout: ""
+    # -- (string) time after which scrape is ended
+    scrapeTimeout:
 
-    # MetricRelabelConfigs to apply to samples before ingestion
+    # -- MetricRelabelConfigs to apply to samples before ingestion
     relabelings: []
 
 persistence:
-  # Whether to enable persistence (will use a temporary volume if not)
+  # -- whether to enable persistence (will use a temporary volume if not)
   enabled: true
 
-  # The name of an existing claim to use (required if persistence is
-  # enabled)
-  existingClaim: ""
+  # -- (string) name of existing claim to use (required if persistence
+  # is enabled)
+  existingClaim:
 
-# Annotations to add to all pods created
+# -- annotations to add to all pods created
 podAnnotations: {}
 
 service:
-  # Whether to create a Service
+  # -- whether to create Service
   enabled: true
 
-  # The type of Service to create
+  # -- type of Service to create
   type: ClusterIP
 
-  # The port on which the Service should listen
+  # -- port on which Service should listen
   port: 80
 
-# Security context to apply to all pods created (you shouldn’t need to
-# change this unless you have unusual requirements)
+# -- security context to apply to all pods created
 podSecurityContext:
   fsGroup: 1500
   fsGroupChangePolicy: "OnRootMismatch"
 
-# Security context to apply to all containers created (you shouldn’t
-# need to change this unless you have unusual requirements)
+# -- security context to apply to all containers created
 securityContext:
   capabilities:
     drop:
@@ -124,18 +123,19 @@ securityContext:
   runAsUser: 1500
 
 ingress:
-  # Whether to create a Traefik IngressRoute using the hostname and
-  # path set in config.public
+  # -- whether to create Traefik IngressRoute using hostname and path
+  # set in config.public
   enabled: false
 
-  # Annotations to add to all ingress resources created
+  # -- annotations to add to all ingress resources created
   annotations: {}
 
   tls:
-    # The name of the secret containing the TLS details
-    secretRef: ""
+    # -- (string) name of secret containing TLS details (required if
+    # ingress is enabled)
+    secretRef:
 
-  # Any custom middleware to add
+  # -- custom middleware to add
   middleware: []
     # - name: my-custom-middleware
     # - name: my-custom-middleware-2
