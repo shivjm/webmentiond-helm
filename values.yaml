@@ -61,8 +61,31 @@ config:
   # Webmentions (required)
   allowedTargetDomains: ""
 
+prometheus:
   # Whether to add annotations to scrape Prometheus metrics
-  prometheus: true
+  annotations: false
+
+  serviceMonitor:
+    # Whether to create a ServiceMonitor from the Prometheus Operator
+    enabled: false
+
+    # The namespace to create a ServiceMonitor in
+    namespace: ""
+
+    # Labels to apply to the ServiceMonitor
+    labels: {}
+
+    # Annotations to apply to the ServiceMonitor
+    annotations: {}
+
+    # How frequently Prometheus should scrape the service
+    interval: ""
+
+    # Time after which the scrape is ended
+    scrapeTimeout: ""
+
+    # MetricRelabelConfigs to apply to samples before ingestion
+    relabelings: []
 
 persistence:
   # Whether to enable persistence (will use a temporary volume if not)
