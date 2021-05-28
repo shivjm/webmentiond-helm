@@ -1,0 +1,60 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+An opinionated Helm chart for running
+[webmentiond](https://webmentiond.org/) ({{ template "chart.description" . }}) on
+Kubernetes (optionally using a secure [Traefik
+IngressRoute](https://doc.traefik.io/traefik/routing/providers/kubernetes-crd/)).
+
+{{ template "chart.homepageLine" . }}
+
+## TL;DR
+
+```text
+$ git clone https://github.com/shivjm/webmentiond-helm/
+$ cd webmentiond-helm
+$ helm install --atomic my-release .
+```
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+### About `config.public`
+
+`public.host` and `public.path` are required by the admin interface. For a server accessible at <kbd>https://www.example.com/webmentions/</kbd>,
+you would use these values:
+
+```yaml
+  public:
+    host: "www.example.com"
+    path: "webmentions/"
+```
+
+## Persistence
+
+webmentiond stores all its data in an SQLite file. To preserve your
+data between installs & upgrades (which is usually what you want),
+you’ll need to create a
+[PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+and specify its name in `config.persistence.existingClaim`.
+
+Providing different volumes to different replicas would mean seeing
+different data in each, which is why only a single volume claim is
+allowed. If you increase the number of replicas from 1, make sure the
+volume’s [access
+mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes)
+is `ReadWriteMany` so it can be simultaneously mounted by all the
+replicas. (This is not supported by some providers.)
+
+## Security
+
+By default, the pods drop all privileges and run as UID 1500. If your
+requirements differ, you can override `podSecurityContext` and
+`securityContext` as usual.
