@@ -17,7 +17,7 @@ metadata:
   {{- end }}
 spec:
   endpoints:
-  - targetPort: http
+  - targetPort: metrics
     path: /metrics
     {{- with .Values.prometheus.serviceMonitor.interval }}
     interval: {{ . }}

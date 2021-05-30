@@ -19,7 +19,7 @@ spec:
       {{- if .Values.config.prometheus }}
         prometheus.io/scrape: "true"
         prometheus.io/path: /metrics
-        prometheus.io/port: http
+        prometheus.io/port: metrics
       {{- end }}
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
@@ -55,9 +55,16 @@ spec:
             {{- end }}
             - "--allowed-target-domains"
             - "{{ required "config.allowedTargetDomains is required!" .Values.config.allowedTargetDomains }}"
+            {{- if or .Values.prometheus.annotations .Values.prometheus.serviceMonitor }}
+            - "--metrics-addr"
+            - "0.0.0.0:8081"
+            {{- end }}
           ports:
             - name: http
               containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 8081
               protocol: TCP
           env:
             - name: AUTH_JWT_SECRET
