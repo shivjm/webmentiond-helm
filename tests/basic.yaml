@@ -1,0 +1,36 @@
+config:
+  mail:
+    host: "foo.svc"
+    from: "someone@somewhere.com"
+    disableTls: true
+
+  public:
+    host: "webmentions.somewhere.com"
+
+  auth:
+    secretRef: "webmentiond-jwt"
+    adminEmails: "someone@somewhere.com,someoneelse@somewhere.com"
+
+  sendNotifications: false
+
+  allowedTargetDomains: "blog.somewhere.com"
+
+prometheus:
+  serviceMonitor:
+    enabled: true
+
+persistence:
+  existingClaim: "webmentiond"
+
+ingress:
+  enabled: true
+  tls:
+    secretRef: "webmentiond-cert-production"
+  middleware:
+    - name: rate-limit
+    - name: compress
+
+resources:
+  requests:
+    cpu: 1m
+    memory: 40m
