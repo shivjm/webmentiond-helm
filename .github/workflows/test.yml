@@ -1,0 +1,110 @@
+name: Run tests
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+env:
+  KUBECONFORM_VERSION: 'v0.4.10'
+  HELM_DOCS_VERSION: '1.5.0'
+
+jobs:
+  helm-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    # TODO use Docker image if GitHub Actions ever allows mounting the source directory as a volume
+    - name: Download helm-docs
+      run: |
+        curl -sSL https://github.com/norwoodj/helm-docs/releases/download/v${{ env.HELM_DOCS_VERSION }}/helm-docs_${{ env.HELM_DOCS_VERSION }}_Linux_x86_64.tar.gz | \
+          tar xzf - helm-docs
+
+    - name: Update docs
+      run: "./helm-docs -o README.md.new"
+
+    - name: Check diff output
+      uses: GuillaumeFalourd/diff-action@v1
+      with:
+        first_file_path: README.md
+        second_file_path: README.md.new
+        expected_result: PASSED
+
+  chart-testing:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.7.0
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Set up chart-testing
+      uses: helm/chart-testing-action@v2.0.1
+      with:
+        version: v2.5.0
+
+    - name: Run chart-testing (list-changed)
+      id: list-changed
+      run: |
+        changed=$(ct list-changed --config ct.yaml)
+        if [[ -n "$changed" ]]; then
+          echo "::set-output name=changed::true"
+        fi
+
+    - name: Run chart-testing (lint)
+      run: ct lint --config ct.yaml .
+
+      # TODO test install
+      # - name: Create kind cluster
+      #   uses: helm/kind-action@v1.1.0
+      #   if: steps.list-changed.outputs.changed == 'true'
+
+      # - name: Run chart-testing (install)
+      #   run: ct install --config ct.yaml
+    
+  kubeval:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 0
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.7.0
+
+    # TODO use Docker image if GitHub Actions ever allows looping
+    - name: Download kubeconform
+      run: |
+        curl -sSL https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz | \
+          tar xzf - kubeconform
+
+    - name: Update dependencies
+      run: |
+        helm dependency build .
+
+    - name: Validate files
+      # TODO the schema file name should use `KindSuffix` too like in
+      # the docs, but what that value is remains a mystery
+      run: |
+        for file in tests/*.yaml; do
+          helm template . -f $file | ./kubeconform -strict -summary -schema-location default -schema-location 'schemas/{{ .ResourceKind }}.json'
+        done
+        
