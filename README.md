@@ -2,6 +2,8 @@
 
 ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.0.0](https://img.shields.io/badge/AppVersion-v1.0.0-informational?style=flat-square)
 
+<b>Moved to [shivjm/helm-charts](https://github.com/shivjm/helm-charts/tree/main/charts/webmentiond). Please do not use this repository as it is no longer updated.</b>
+
 An opinionated Helm chart for running
 [webmentiond](https://webmentiond.org/) (A simple webmention receiver in Go) on
 Kubernetes (optionally using a secure [Traefik
